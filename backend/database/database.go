@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -34,11 +35,19 @@ func Newdatabase() models.Database {
 	get_envs(&db)
 
 	var dbtemp *gorm.DB
-	fmt.Println(os.Getenv("DATABASE_URL"))
+	max_attempts := 15
+
 	dbtemp, err := gorm.Open(postgres.Open(os.Getenv("DATABASE_URL")), &gorm.Config{})
 	db.Db = dbtemp
 	if err != nil {
-		panic(err)
+		print(err)
+		max_attempts--
+		time.Sleep(2 * time.Second)
+		dbtemp, err = gorm.Open(postgres.Open(os.Getenv("DATABASE_URL")), &gorm.Config{})
+		db.Db = dbtemp
+		if max_attempts == 0 {
+			panic(err)
+		}
 	}
 
 	db.Db.AutoMigrate(&models.User{})

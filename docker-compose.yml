@@ -16,14 +16,16 @@ services:
       DATABASE_URL: postgresql://root:postgres@localhost:5432/airdb
     volumes:
       - ~/apps/postgres:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
     image: postgres:14-alpine
     networks:
       - backnet
+
   backend:
-    environment:
-      DATABASE_URL: postgresql://root:postgres@database:5432/airdb
     depends_on:
       - database
+    environment:
+      DATABASE_URL: postgresql://root:postgres@database:5432/airdb
     build: ./backend
     ports:
       - 8080:8080
