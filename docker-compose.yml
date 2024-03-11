@@ -1,0 +1,34 @@
+
+version: '3.4'
+
+services:
+  database:
+    container_name: airdb
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: root
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: airdb
+      POSTGRES_DB: airdb
+      POSTGRES_PASSWORD: postgres
+      DATABASE_URL: postgresql://root:postgres@localhost:5432/airdb
+    volumes:
+      - ~/apps/postgres:/var/lib/postgresql/data
+    image: postgres:14-alpine
+    networks:
+      - backnet
+  backend:
+    environment:
+      DATABASE_URL: postgresql://root:postgres@database:5432/airdb
+    depends_on:
+      - database
+    build: ./backend
+    ports:
+      - 8080:8080
+    networks:
+      - backnet
+networks:
+  backnet:
+  frontnet:
